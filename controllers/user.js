@@ -1,8 +1,9 @@
 const mongoose = require('mongoose');
 const modelUser = mongoose.model('User');
 const bcrypt = require('bcrypt');
-
-import * as jwt from './jwt.js';
+//
+// const sign = require('jwt');
+// const verify = require('jwt');
 
 let userController = {};
 
@@ -20,7 +21,7 @@ userController.newUser = (req, res) => {
       modelUser.findOne({ 'email': req.body.email })
         .then(user => {
           if(user) {
-            res.json({ success:false, message: 'Este usuário não está disponível.' })
+            res.status(404).send('Este usuário não está disponível.')
           }
           else{
             bcrypt.hash(req.body.password, 10)
@@ -34,11 +35,18 @@ userController.newUser = (req, res) => {
                 });
 
                 newUser.save()
-                  .then(() => res.json({ success: true, message: 'Usuário criado com sucesso', statusCode: 201 }))
-                  .catch(err => res.json({ success: false, message: err, statusCode: 500 }));
+                  .then(() => {
+                    // const token = jwt.sign(
+                    //   {user: user._id}
+                    // );
+                    res.json({ success: true, message: 'Usuário criado com sucesso', statusCode: 201 });
+                    // res.send(user, token);
+
+                  })
+                  .catch(err => res.status(404).send('Erro1'));
               })
 
-              .catch(err=> res.json({ success: false, message: err, statusCode: 500 }));
+              .catch(err=> res.status(404).send('Erro2'));
           }
         })
     } else {
@@ -68,13 +76,13 @@ userController.logIn = (req, res) => {
     'email': req.body.email})
       .then((user) => {
       if(!user){
-        console.error('Não há usuário registrado.');;
+        res.status(404).send('Usuário não cadastrado.');
       } else {
         bcrypt.compare(req.body.password, user.password, function(err, result) {
           if(result == true){
             res.send(user);
           } else {
-            throw new Error('Senha incorreta');
+            res.status(404).send('A senha não confere.');
           }
         });
       }
