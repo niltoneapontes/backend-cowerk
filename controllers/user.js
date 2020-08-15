@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 const modelUser = mongoose.model('User');
 const bcrypt = require('bcrypt');
 
+import * as jwt from './jwt.js';
+
 let userController = {};
 
 userController.allUsers = (req, res) => {
@@ -59,6 +61,24 @@ userController.deleteUser = (req,res) => {
     console.log("User deletada com sucesso!");
   }
 });
+}
+
+userController.logIn = (req, res) => {
+  modelUser.findOne({
+    'email': req.body.email})
+      .then((user) => {
+      if(!user){
+        console.error('Não há usuário registrado.');;
+      } else {
+        bcrypt.compare(req.body.password, user.password, function(err, result) {
+          if(result == true){
+            res.send(user);
+          } else {
+            throw new Error('Senha incorreta');
+          }
+        });
+      }
+    });
 }
 
 module.exports = userController;
