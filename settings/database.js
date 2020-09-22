@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 mongoose.Promise = global.Promise;
 
-mongoose.connect('mongodb://niltonpontes:$BQhsF$3BSbUcRm@ds263928.mlab.com:63928/heroku_80x6wms4', {useNewUrlParser: true});
+mongoose.connect(process.env.MONGOLAB_URI || 'mongodb://localhost:27017/littlecoffeedb', {useNewUrlParser: true});
 
 mongoose.connection.on('connected', () => {
   console.log('Conectado ao banco de dados!');
